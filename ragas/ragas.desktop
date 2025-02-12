@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Version=3.5.1+6
+Name=ragas
+GenericName=Ground Control Station
+Icon=ragas
+Exec=env LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/share/ragas/lib /usr/bin/ragas
+Categories=QGC;Drone;
+Keywords=Ground Control Station;
+StartupNotify=false

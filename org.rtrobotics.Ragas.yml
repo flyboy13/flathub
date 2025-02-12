@@ -1,0 +1,112 @@
+id: org.rtrobotics.Ragas
+runtime: org.freedesktop.Platform
+runtime-version: 22.08
+sdk: org.freedesktop.Sdk
+command: entrypoint.sh
+finish-args:
+  - --share=network
+  - --socket=wayland
+  - --socket=x11
+  - --device=all
+  - --filesystem=host
+  - --talk-name=org.freedesktop.secrets
+  - --socket=pulseaudio
+  - --device=dri
+
+modules:
+  - name: gtk3
+    buildsystem: meson
+    config-opts:
+      - -Dwayland_backend=true
+      - -Dx11_backend=true
+      - -Dintrospection=true
+    sources:
+      - type: archive
+        url: https://download.gnome.org/sources/gtk+/3.24/gtk+-3.24.38.tar.xz
+        sha256: ce11decf018b25bdd8505544a4f87242854ec88be054d9ade5f3a20444dd8ee7
+
+  - name: ibus
+    buildsystem: autotools
+    config-opts:
+      - --disable-gtk2
+      - --disable-gtk4
+      - --disable-python2
+      - --enable-wayland
+    sources:
+      - type: archive
+        url: https://github.com/ibus/ibus/releases/download/1.5.29/ibus-1.5.29.tar.gz
+        sha256: 4a457f10e29da0623e96cbbaca89cc529145587141f8e64c305f17dc875d5e6e
+
+  - name: libsecret
+    buildsystem: meson
+    config-opts:
+      - -Dmanpage=false
+      - -Dvapi=false
+      - -Dgtk_doc=false
+      - -Dintrospection=false
+    cleanup:
+      - /bin
+      - /include
+      - /lib/pkgconfig
+      - /share/man
+    sources:
+      - type: archive
+        url: https://download.gnome.org/sources/libsecret/0.20/libsecret-0.20.5.tar.xz
+        sha256: 3fb3ce340fcd7db54d87c893e69bfc2b1f6e4d4b279065ffe66dac9f0fd12b4d
+  - name: libass
+    cleanup:
+      - /include
+      - /lib/*.la
+      - /lib/pkgconfig
+    config-opts:
+      - --disable-static
+    sources:
+      - type: archive
+        url: https://github.com/libass/libass/releases/download/0.17.0/libass-0.17.0.tar.gz
+        sha256: 72b9ba5d9dd1ac6d30b5962f38cbe7aefb180174f71d8b65c5e3c3060dbc403f
+      
+  - name: mpv
+    buildsystem: simple
+    build-commands:
+      - python3 waf configure --prefix=/app --enable-libmpv-shared --disable-cplayer
+      - python3 waf build
+      - python3 waf install
+      - ldconfig /app/lib
+    sources:
+      - type: archive
+        url: https://github.com/mpv-player/mpv/archive/refs/tags/v0.34.1.tar.gz
+        sha256: 32ded8c13b6398310fa27767378193dc1db6d78b006b70dbcbd3123a1445e746
+      - type: file
+        url: https://waf.io/waf-2.0.25
+        sha256: 21199cd220ccf60434133e1fd2ab8c8e5217c3799199c82722543970dc8e38d5
+        dest-filename: waf
+
+
+  - name: ragas
+    buildsystem: simple
+    build-commands:
+        
+      - install -Dm755 ragas /app/bin/ragas
+      - install -Dm755 lib/libisar_flutter_libs_plugin.so /app/lib/libisar_flutter_libs_plugin.so
+      - install -Dm755 lib/liburl_launcher_linux_plugin.so /app/lib/liburl_launcher_linux_plugin.so
+      - install -Dm755 lib/libmedia_kit_video_plugin.so /app/lib/libmedia_kit_video_plugin.so
+      - install -Dm755 lib/libmedia_kit_native_event_loop.so /app/lib/libmedia_kit_native_event_loop.so
+      - install -Dm755 lib/libisar.so /app/lib/libisar.so
+      - install -Dm755 lib/libmavlink_wrapper.so /app/lib/libmavlink_wrapper.so
+      - install -Dm755 lib/libflutter_linux_gtk.so /app/lib/libflutter_linux_gtk.so
+      - install -Dm755 lib/libmavlink_plugin_plugin.so /app/lib/libmavlink_plugin_plugin.so
+      - install -Dm755 lib/libapp.so /app/lib/libapp.so
+      - install -Dm755 lib/libmedia_kit_libs_linux_plugin.so /app/lib/libmedia_kit_libs_linux_plugin.so
+      - install -Dm755 lib/libflutter_gstreamer_player_plugin.so /app/lib/libflutter_gstreamer_player_plugin.so
+      - install -Dm755 lib/libflutter_secure_storage_linux_plugin.so /app/lib/libflutter_secure_storage_linux_plugin.so
+
+      - |
+        cat > /app/bin/entrypoint.sh <<EOF
+        #!/bin/sh
+        export LD_LIBRARY_PATH=/app/lib:\$LD_LIBRARY_PATH
+        exec /app/bin/ragas "\$@"
+        EOF
+      - chmod +x /app/bin/entrypoint.sh
+    sources:
+      - type: dir
+        path: build/linux/x64/release/bundle

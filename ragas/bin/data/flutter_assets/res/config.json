@@ -1,0 +1,15 @@
+{
+  "ipDrone":"192.168.0.215",
+  "portDrone":1003,
+  "ipCC":"192.168.0.123",
+  "portCC":1003,
+  "ipCCTwo":"192.168.0.123",
+  "portCCTwo":1003,
+  "joyStick":1,
+  "payloadType":"FEZ3",
+  "NumOfPayload":2,
+  "ipPayloadOne":"192.168.0.102",
+  "portPayloadOne":1003,
+  "ipPayloadTwo":"192.168.0.103",
+  "portPayloadTwo":1003
+}
